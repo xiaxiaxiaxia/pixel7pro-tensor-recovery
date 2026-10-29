@@ -29,6 +29,41 @@ Full details: [`docs/en/`](docs/en/) · [`docs/zh/`](docs/zh/)
 
 ---
 
+## The reported problem (before any work)
+
+The starting symptom set, as reported:
+
+1. **Bootloader unreachable.** `fastboot devices` and `adb devices` were both empty. The phone
+   only enumerated as `18d1:4f00 "Pixel ROM Recovery"` — the Tensor BootROM USB download mode —
+   and the screen stayed black. No fastboot, no recovery.
+2. **Official flashing path unusable.** `flash-all.sh` needs a working bootloader; there was none.
+3. **Unlock status `-1`, flashing refused.** After bringing the chain up with `tensor-usbdl`, the
+   unlock state was reported as `-1` and flash operations were rejected.
+
+### What `-1` actually means
+
+`-1` (`0xFFFFFFFF`) is the **"unknown / not initialised" sentinel**, not a lock state. It is what
+ABL returns when the unlock-state query to **Titan M2 / GSA** cannot complete — the typical
+situation for a RAM-resident, partially initialised recovery bootloader that has not finished
+talking to the security chip.
+
+It does **not** mean "locked", and it does **not** mean the device is permanently unlockable.
+Reading it as "locked" is what makes people conclude the phone is unrecoverable.
+
+In this session:
+
+| Context | `fastboot getvar unlocked` |
+|---|---|
+| Recovery bootloader in RAM (`cloudripper-1.0-8910487`) | `yes` |
+| Official bootloader from flash (`cloudripper-17.0-15902555`) | `yes` |
+
+So the unlock state was intact all along; what was broken was the **boot chain**, and what made
+flashing "refused" was not the lock but the missing/failed bootloader context.
+
+Full original prompt (redacted) is archived at [`docs/original-request.md`](docs/original-request.md).
+
+---
+
 ## Why it bricked
 
 Anti-rollback versions live in **OTP eFuses** on the SoC: monotonic, not erasable, not
@@ -47,6 +82,7 @@ inactive slot, seamless-update fallback boots it, device becomes unbootable).
 .
 ├── README.md
 ├── docs/
+│   ├── original-request.md                     # the prompt that started this (redacted)
 │   ├── en/pixel7pro-recovery-and-audit-en.md   # full log + audit (English)
 │   └── zh/pixel7pro-recovery-and-audit-zh.md   # full log + audit (Chinese)
 ├── tools/
@@ -163,6 +199,14 @@ want it to be explicit on GitHub.
    BootROM 拒绝；恢复包里的是 `0x410 = 0x01`。
 3. **先刷 bootloader 再刷系统**：14 MB 的 bootloader 写入能把设备从"RAM 临时引导"变成
    "flash 官方引导"，此后任何失败都可重试。
+
+**关于"bootloader 进不去 + 解锁状态 -1"：**
+
+- 当时 `fastboot devices` / `adb devices` 全空，只有 `18d1:4f00 Pixel ROM Recovery`——因为设备根本
+  没在跑 bootloader，而是停在 BootROM 的 USB 下载模式，所以"进不去 bootloader"是必然结果。
+- `-1` 不是"锁死"，而是 ABL 查询 Titan M2/GSA 失败时返回的**未知值**（0xFFFFFFFF）。在 RAM 里跑
+  的临时引导（`cloudripper-1.0-8910487`）尚未完成与安全芯片的握手，就会出现这个值。
+- 本次实测：临时引导和官方引导下 `fastboot getvar unlocked` 都是 `yes`。**锁状态一直是好的，坏的是引导链。**
 
 **安全结论**：全程未使用任何漏洞、未绕过签名、未改熔丝。所谓"降级锁"是 OTP 熔丝，
 物理不可回写；能救回设备的是"官方签名镜像 + 正确时序"，不是破解。

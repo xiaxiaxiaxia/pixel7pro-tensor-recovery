@@ -54,6 +54,13 @@ crw-rw-rw-  1 root  wheel  0x9000005  /dev/cu.usbmodem<PORT>
 - Recovery unreachable;
 - Official `flash-all` completely unusable.
 
+**Reading `-1`:** `0xFFFFFFFF` is the "unknown" value ABL returns when the unlock-state query to
+Titan M2/GSA fails — not a "locked" state. It shows up most often on a RAM-resident recovery
+bootloader (`cloudripper-1.0-8910487`) that has not finished handshaking with the security chip.
+In this session `fastboot getvar unlocked` returned `yes` under both the recovery bootloader and
+the official one — **the lock state was fine all along; the boot chain was what broke.** Reading
+`-1` as "locked" is the usual reason people conclude the device is unrecoverable.
+
 ### 2.3 Device identification
 
 The BootROM announced itself over serial:

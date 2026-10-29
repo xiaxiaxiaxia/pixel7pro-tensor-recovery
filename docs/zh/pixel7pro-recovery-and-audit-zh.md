@@ -54,6 +54,11 @@ crw-rw-rw-  1 root  wheel  0x9000005  /dev/cu.usbmodem<PORT>
 - 无法进入 recovery；
 - 官方 `flash-all` 完全不可用。
 
+**关于 `-1` 的判读**：`0xFFFFFFFF` 是 ABL 向 Titan M2/GSA 查询解锁态失败时返回的"未知"值，
+不是"已锁死"。在 RAM 中运行、尚未完成与安全芯片握手的临时引导（`cloudripper-1.0-8910487`）
+最容易出现该值。本次实测中，临时引导与官方引导下 `fastboot getvar unlocked` 均返回 `yes`——
+**锁状态一直是好的，坏的是引导链**。把它读成"锁定"是很多人误判设备"彻底砖"的根源。
+
 ### 2.3 设备识别
 
 BootROM 在串口上主动报出：
