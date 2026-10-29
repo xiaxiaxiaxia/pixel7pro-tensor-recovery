@@ -1,0 +1,13 @@
+# --- proprietary binaries: never commit ---
+*.zip
+*.img
+*.bin
+factory-extracted/
+recovery-pack/
+sources/
+bin/
+
+# --- local noise ---
+.DS_Store
+__pycache__/
+*.pyc

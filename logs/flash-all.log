@@ -1,0 +1,19 @@
+# fastboot flash-all.sh — key lines (excerpt, sanitised)
+
+Sending 'bootloader_a' (14203 KB)                  OKAY [  0.335s]
+Writing 'bootloader_a'                             (bootloader) Flashing pack version cloudripper-17.0-15902555
+Rebooting into bootloader                          OKAY [  0.000s]
+Writing 'radio_a'                                  (bootloader) Flashing pack version g5300q-260604-260807-M-16036236
+Rebooting into bootloader                          OKAY [  0.000s]
+Bootloader Version...: cloudripper-17.0-15902555
+Baseband Version.....: g5300q-260604-260807-B-16036236
+Serial Number........: REDACTED
+Setting current slot to 'a'                        OKAY [  0.082s]
+Erasing 'userdata'                                 OKAY [  0.747s]
+Erasing 'metadata'                                 OKAY [  0.013s]
+Sending sparse 'super' 1/27 (254972 KB)            OKAY [  6.034s]
+Sending sparse 'super' 27/27 (197892 KB)           OKAY [  4.668s]
+Erasing 'userdata'                                 OKAY [  0.713s]
+Erasing 'metadata'                                 OKAY [  0.014s]
+Rebooting                                          OKAY [  0.000s]
+Finished. Total time: 195.629s
