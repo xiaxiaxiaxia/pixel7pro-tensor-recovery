@@ -1,5 +1,7 @@
 # Pixel 7 Pro (Tensor G2) — Unbrick Log & Boot-Chain Security Audit
 
+**English** · [简体中文](README.zh-CN.md)
+
 Recovery record of a hard-bricked **Pixel 7 Pro (`cheetah`, SoC `gs201`)** that was stuck in
 `18d1:4f00 "Pixel ROM Recovery"` (Tensor BootROM USB Download Mode) after a bootloader
 downgrade tripped **anti-rollback (ARB)**. It was brought back and flashed to the latest
@@ -80,7 +82,8 @@ inactive slot, seamless-update fallback boots it, device becomes unbootable).
 
 ```
 .
-├── README.md
+├── README.md                                   # English (this file)
+├── README.zh-CN.md                             # 简体中文
 ├── docs/
 │   ├── original-request.md                     # the prompt that started this (redacted)
 │   ├── en/pixel7pro-recovery-and-audit-en.md   # full log + audit (English)
@@ -181,36 +184,3 @@ the official factory package afterwards** and check `fastboot getvar version-boo
 
 Suggested: **CC BY 4.0** for the documents, **MIT** for the scripts. Add a `LICENSE` file if you
 want it to be explicit on GitHub.
-
----
-
-<details>
-<summary>中文摘要（点击展开）</summary>
-
-一台 Pixel 7 Pro 因 bootloader 降级触发 **anti-rollback**，卡在 `18d1:4f00 Pixel ROM Recovery`
-（Tensor BootROM USB 下载模式）。最终用 Google 官方签名的 recovery 引导链恢复，并刷入
-`CP3A.261005.002.A1`（Android 17，2026-10）。
-
-**关键三点：**
-
-1. **三键进入 BL1-first 模式**：电源 + 音量加 + 音量减，插线时保持，插上后继续按住 ≥15 秒，
-   然后**全部松开**（不松会导致链路每 5–10 秒从 BL1 重启）。
-2. **必须用 re-signed 的 BL1**：factory 的 `bl1.img` 头部 `0x410 = 0x00`（USB-bootable 位未置），
-   BootROM 拒绝；恢复包里的是 `0x410 = 0x01`。
-3. **先刷 bootloader 再刷系统**：14 MB 的 bootloader 写入能把设备从"RAM 临时引导"变成
-   "flash 官方引导"，此后任何失败都可重试。
-
-**关于"bootloader 进不去 + 解锁状态 -1"：**
-
-- 当时 `fastboot devices` / `adb devices` 全空，只有 `18d1:4f00 Pixel ROM Recovery`——因为设备根本
-  没在跑 bootloader，而是停在 BootROM 的 USB 下载模式，所以"进不去 bootloader"是必然结果。
-- `-1` 不是"锁死"，而是 ABL 查询 Titan M2/GSA 失败时返回的**未知值**（0xFFFFFFFF）。在 RAM 里跑
-  的临时引导（`cloudripper-1.0-8910487`）尚未完成与安全芯片的握手，就会出现这个值。
-- 本次实测：临时引导和官方引导下 `fastboot getvar unlocked` 都是 `yes`。**锁状态一直是好的，坏的是引导链。**
-
-**安全结论**：全程未使用任何漏洞、未绕过签名、未改熔丝。所谓"降级锁"是 OTP 熔丝，
-物理不可回写；能救回设备的是"官方签名镜像 + 正确时序"，不是破解。
-
-完整中文文档见 [`docs/zh/`](docs/zh/)。
-
-</details>
